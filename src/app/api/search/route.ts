@@ -74,7 +74,14 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    const response = NextResponse.json({ results: chunks });
+    const response = NextResponse.json({
+      results: chunks,
+      debug: {
+        original_query: query,
+        vector_sample: vector ? vector.slice(0, 5) : "null", // Inspect first 5 dims
+        timestamp: new Date().toISOString(),
+      },
+    });
 
     // Aggressive Cache Busting Headers
     response.headers.set(
