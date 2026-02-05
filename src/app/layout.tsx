@@ -10,7 +10,44 @@ const ibmPlexSansArabic = IBM_Plex_Sans_Arabic({
 
 export const metadata: Metadata = {
   title: "لحظة | Lahza",
-  description: "محرك بحث دلالي في أرشيف ثمانية",
+  description: "محرك بحث دلالي في أرشيف ثمانية. ابحث عن الفكرة، لا الحلقة.",
+  icons: {
+    icon: "/logo.png",
+    shortcut: "/logo.png",
+    apple: "/logo.png",
+  },
+  openGraph: {
+    title: "لحظة | Lahza",
+    description: "محرك بحث دلالي في أرشيف ثمانية. ابحث عن الفكرة، لا الحلقة.",
+    siteName: "Lahza",
+    locale: "ar_SA",
+    type: "website",
+    images: [
+      {
+        url: "/logo.png",
+        width: 800,
+        height: 600,
+        alt: "Lahza Logo",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "لحظة | Lahza",
+    description: "لا تبحث عن الحلقة.. ابحث عن الفكرة",
+    images: ["/logo.png"],
+  },
+  keywords: [
+    "ثمانية",
+    "بودكاست",
+    "بحث",
+    "دلالي",
+    "AI",
+    "Thmanyah",
+    "Podcast",
+    "Search",
+    "Lahza",
+  ],
 };
 
 export default function RootLayout({
