@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Search, Loader2, Play } from "lucide-react";
+import { Search, Loader2, Play, ArrowLeft } from "lucide-react";
 import { SearchResult } from "@/types";
 import Image from "next/image";
 
@@ -66,8 +66,14 @@ export default function Home() {
     <main className="min-h-screen bg-[oklch(0.92_0.02_95)] text-[#1f1f1f] flex flex-col items-center selection:bg-[#C05838]/20 font-sans relative overflow-x-hidden">
       {/* Navbar Minimal Placeholder */}
       <nav className="w-full max-w-7xl mx-auto p-6 flex justify-between items-center z-10">
-        <div className="text-2xl font-bold tracking-tighter text-black">
-          ثمانية
+        <div className="relative w-28 h-24 hover:opacity-90 transition-opacity cursor-pointer">
+          <Image
+            src="/logo.png"
+            alt="Lahza Logo"
+            fill
+            className="object-contain object-right"
+            priority
+          />
         </div>
         <div className="hidden md:flex gap-6 text-sm font-medium text-[#C05838]">
           <a href="#" className="hover:opacity-80 transition-opacity">
@@ -83,12 +89,16 @@ export default function Home() {
       <div
         className={`w-full max-w-4xl px-6 transition-all duration-700 ease-out z-10 ${results.length > 0 || activeVideo ? "mt-8 mb-12" : "mt-[25vh]"}`}>
         <div
-          className={`text-center mb-10 duration-700 transition-all ${results.length > 0 || activeVideo ? "scale-90" : "scale-100"}`}>
-          <h1 className="text-6xl md:text-8xl font-bold tracking-tight mb-6 text-black">
-            بحث ثمانية
+          className={`text-center mb-10 duration-700 transition-all flex flex-col items-center ${results.length > 0 || activeVideo ? "scale-90" : "scale-100"}`}>
+          <h1 className="text-6xl md:text-8xl font-bold tracking-tight mb-6 text-black font-sans">
+            لحظة{" "}
+            <span className="text-[#C05838] font-light text-5xl md:text-7xl">
+              | Lahza
+            </span>
           </h1>
-          <p className="text-xl md:text-2xl text-[#555] font-light max-w-2xl mx-auto leading-relaxed">
-            لا تبحث عن الحلقة.. ابحث عن الفكرة{" "}
+
+          <p className="text-xl md:text-2xl text-[#555] font-light max-w-2xl mx-auto leading-relaxed -mt-4">
+            لا تبحث عن الحلقة.. ابحث عن الفكرة
           </p>
         </div>
 
@@ -96,27 +106,31 @@ export default function Home() {
           onSubmit={handleSearch}
           className="relative w-full max-w-3xl mx-auto">
           <div className="relative group">
-            <div className="absolute -inset-0.5 bg-[#C05838]/20 rounded-2xl blur opacity-0 group-hover:opacity-100 transition duration-500"></div>
-            <div className="relative flex items-center bg-white rounded-2xl border-2 border-[#E5E5E5] shadow-sm hover:border-[#C05838]/50 focus-within:border-[#C05838] focus-within:ring-4 focus-within:ring-[#C05838]/10 transition-all duration-300">
-              <Search className="ml-5 text-[#999] w-6 h-6" />
+            <div className="absolute -inset-0.5 bg-[#C05838]/10 rounded-full blur-sm opacity-0 group-hover:opacity-100 transition duration-500"></div>
+            <div className="relative flex items-center bg-white rounded-full border border-[#E5E5E5] shadow-sm hover:border-[#C05838]/50 hover:shadow-md focus-within:border-[#C05838] focus-within:ring-4 focus-within:ring-[#C05838]/5 transition-all duration-300 h-16">
+              <div className="flex items-center justify-center w-14 h-full pointer-events-none">
+                <Search className="text-[#C05838] w-6 h-6 opacity-70" />
+              </div>
               <Input
-                className="border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent text-xl py-8 pl-16 pr-12 text-[#1f1f1f] placeholder:text-[#999] font-normal w-full"
-                placeholder="ابحث عن موضوع، ضيف، أو فكرة..."
+                className="flex-1 border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent text-xl h-full px-2 text-[#1f1f1f] placeholder:text-[#999] font-normal"
+                placeholder="ابحث في أرشيف ثمانية دلالياً..."
                 value={query}
                 onChange={e => setQuery(e.target.value)}
                 dir="rtl"
               />
-              <Button
-                type="submit"
-                size="icon"
-                className="absolute left-3 h-11 w-11 bg-[#C05838] hover:bg-[#A04828] text-white rounded-xl shadow-md transition-transform hover:scale-105 active:scale-95"
-                disabled={loading}>
-                {loading ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                ) : (
-                  <Search className="w-5 h-5" />
-                )}
-              </Button>
+              <div className="pl-2">
+                <Button
+                  type="submit"
+                  size="icon"
+                  className="h-12 w-12 rounded-full bg-white hover:bg-[#FAF9F6] text-[#C05838] border border-transparent hover:border-[#E5E5E5] transition-all ml-2"
+                  disabled={loading}>
+                  {loading ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : (
+                    <ArrowLeft className="w-5 h-5" />
+                  )}
+                </Button>
+              </div>
             </div>
           </div>
         </form>
@@ -250,6 +264,19 @@ export default function Home() {
           </div>
         )}
       </div>
+      {/* Footer */}
+      <footer className="w-full py-8 mt-auto text-center text-[#777] text-sm font-medium z-10 animate-in fade-in duration-1000 delay-500">
+        <p>
+          Designed by{" "}
+          <a
+            href="https://www.linkedin.com/in/mo-fuhidy/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[#C05838] hover:text-[#A04828] transition-colors decoration-wavy underline-offset-4 hover:underline">
+            Fuhidy
+          </a>
+        </p>
+      </footer>
     </main>
   );
 }

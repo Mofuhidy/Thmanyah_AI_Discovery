@@ -9,8 +9,8 @@ const ibmPlexSansArabic = IBM_Plex_Sans_Arabic({
 });
 
 export const metadata: Metadata = {
-  title: "Thamanya AI Discovery",
-  description: "Semantic search engine for Thamanya Podcast",
+  title: "لحظة | Lahza",
+  description: "محرك بحث دلالي في أرشيف ثمانية",
 };
 
 export default function RootLayout({
