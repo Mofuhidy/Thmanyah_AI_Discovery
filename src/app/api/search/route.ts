@@ -2,6 +2,7 @@ import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 
 export const runtime = "edge"; // Re-enabled for Vercel Free Tier (Zero-Dollar Arch)
+export const dynamic = "force-dynamic"; // Ensure no caching of results
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
@@ -32,6 +33,7 @@ export async function POST(req: Request) {
           model: "models/text-embedding-004",
           content: { parts: [{ text: query }] },
         }),
+        cache: "no-store", // Critical: Disable Next.js fetch caching
       },
     );
 
@@ -64,7 +66,7 @@ export async function POST(req: Request) {
     // 3. Perform Similarity Search
     const { data: chunks, error } = await supabase.rpc("match_chunks", {
       query_embedding: vector,
-      match_threshold: 0.6, // Balanced threshold for Prod (0.60 ensures good recall)
+      match_threshold: 0.5, // Balanced threshold
       match_count: 10,
     });
 
