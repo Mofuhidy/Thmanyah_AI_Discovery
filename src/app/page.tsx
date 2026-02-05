@@ -12,6 +12,8 @@ import { SearchResult } from "@/types";
 export default function Home() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
+  const [hasSearched, setHasSearched] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [activeVideo, setActiveVideo] = useState<{
     url: string;
@@ -24,6 +26,8 @@ export default function Home() {
 
     setLoading(true);
     setResults([]);
+    setError(null);
+    setHasSearched(true);
     setActiveVideo(null);
 
     try {
@@ -34,11 +38,17 @@ export default function Home() {
       });
 
       const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Something went wrong");
+      }
+
       if (data.results) {
         setResults(data.results);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Search failed", error);
+      setError(error.message || "فشل البحث، يرجى المحاولة مرة أخرى");
     } finally {
       setLoading(false);
     }
@@ -101,6 +111,21 @@ export default function Home() {
       </div>
 
       {/* Content Area */}
+      <div className="w-full max-w-2xl mx-auto px-4">
+        {error && (
+          <div className="bg-red-500/10 border border-red-500/50 text-red-200 px-4 py-3 rounded-xl text-center mb-8 animate-in fade-in slide-in-from-bottom-2">
+            {error}
+          </div>
+        )}
+
+        {!loading && hasSearched && results.length === 0 && !error && (
+          <div className="text-center text-slate-400 py-12 animate-in fade-in zoom-in duration-500">
+            <p className="text-lg">لا توجد نتائج مطابقة لبحثك</p>
+            <p className="text-sm mt-2 opacity-70">جرب كلمات مفتاحية مختلفة</p>
+          </div>
+        )}
+      </div>
+
       {(results.length > 0 || activeVideo) && (
         <div className="w-full max-w-6xl px-4 pb-20 grid grid-cols-1 lg:grid-cols-3 gap-8 animate-in fade-in slide-in-from-bottom-10 duration-700">
           {/* Results List */}
@@ -121,11 +146,32 @@ export default function Home() {
                     }>
                     <CardContent className="p-4">
                       <div className="flex justify-between items-start mb-2">
-                        <Badge
-                          variant="outline"
-                          className="text-teal-400 border-teal-400/30 text-xs">
-                          {formatTime(result.start_time)}
-                        </Badge>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="text-teal-400 font-mono text-xs bg-teal-950/30 px-2 py-1 rounded">
+                              {formatTime(result.start_time)}
+                            </span>
+                            <h3 className="font-semibold text-slate-200 truncate">
+                              {result.episode_title}
+                            </h3>
+                          </div>
+
+                          <p className="text-slate-400 text-sm line-clamp-2 leading-relaxed mb-3">
+                            {result.content}
+                          </p>
+
+                          {/* Thumbnail Preview (if available) */}
+                          {result.thumbnail_url && (
+                            <div className="relative w-full h-32 mb-3 rounded-lg overflow-hidden border border-slate-700/50">
+                              <img
+                                src={result.thumbnail_url}
+                                alt={result.episode_title}
+                                className="object-cover w-full h-full opacity-80 group-hover:opacity-100 transition-opacity"
+                              />
+                              <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent" />
+                            </div>
+                          )}
+                        </div>
                         <Badge
                           variant="secondary"
                           className="bg-slate-700 text-slate-300 text-[10px]">
@@ -183,7 +229,9 @@ export default function Home() {
 }
 
 function formatTime(seconds: number) {
-  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
   const secs = Math.floor(seconds % 60);
-  return `${minutes}:${secs.toString().padStart(2, "0")}`;
+
+  return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
 }
