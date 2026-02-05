@@ -12,9 +12,9 @@ export const metadata: Metadata = {
   title: "لحظة | Lahza",
   description: "محرك بحث دلالي في أرشيف ثمانية. ابحث عن الفكرة، لا الحلقة.",
   icons: {
-    icon: "/icon.png",
-    shortcut: "/icon.png",
-    apple: "/icon.png",
+    icon: "/lahza.ico",
+    shortcut: "/lahza.ico",
+    apple: "/lahza.ico",
   },
   openGraph: {
     title: "لحظة | Lahza",
