@@ -115,34 +115,53 @@ export default function Home() {
                 {results.map(result => (
                   <Card
                     key={result.id}
-                    className="bg-slate-800/50 border-slate-700 hover:bg-slate-800 hover:border-teal-500/50 transition-all cursor-pointer group"
+                    className="bg-[#2a1b3d]/50 border-white/5 hover:bg-[#2a1b3d] hover:border-violet-500/30 transition-all cursor-pointer group"
                     onClick={() =>
                       playVideo(result.episode_url, result.start_time)
                     }>
-                    <CardContent className="p-4">
-                      <div className="flex justify-between items-start mb-2">
-                        <Badge
-                          variant="outline"
-                          className="text-teal-400 border-teal-400/30 text-xs">
-                          {formatTime(result.start_time)}
-                        </Badge>
+                    <CardContent className="p-5">
+                      <div className="flex justify-between items-start mb-3">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="text-violet-300 font-mono text-xs bg-violet-500/10 px-2 py-1 rounded">
+                              {formatTime(result.start_time)}
+                            </span>
+                            <h3 className="font-bold text-white truncate text-lg">
+                              {result.episode_title}
+                            </h3>
+                          </div>
+
+                          <p className="text-slate-300 text-sm line-clamp-2 leading-relaxed mb-4 font-light">
+                            {result.content}
+                          </p>
+
+                          {/* Thumbnail Preview */}
+                          {result.thumbnail_url && (
+                            <div className="relative w-full h-40 mb-3 rounded-lg overflow-hidden border border-white/10 group-hover:border-violet-500/20 transition-colors">
+                              <img
+                                src={result.thumbnail_url}
+                                alt={result.episode_title}
+                                className="object-cover w-full h-full opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500"
+                              />
+                              <div className="absolute inset-0 bg-gradient-to-t from-[#1c0c26]/80 to-transparent" />
+                              <div className="absolute bottom-2 right-2 bg-black/60 backdrop-blur-sm text-white text-[10px] px-1.5 py-0.5 rounded flex items-center gap-1">
+                                <Play className="w-2 h-2 fill-white" />
+                                تشغيل
+                              </div>
+                            </div>
+                          )}
+                        </div>
                         <Badge
                           variant="secondary"
-                          className="bg-slate-700 text-slate-300 text-[10px]">
+                          className="bg-violet-500/10 text-violet-300 hover:bg-violet-500/20 border-violet-500/20 text-[10px] mr-2">
                           {(result.similarity * 100).toFixed(0)}% تطابق
                         </Badge>
                       </div>
                       <p
-                        className="text-slate-200 text-sm leading-relaxed mb-3 line-clamp-3 group-hover:text-teal-50 transition-colors"
+                        className="text-slate-200 text-sm leading-relaxed mb-2 line-clamp-3 group-hover:text-white transition-colors font-light"
                         dir="rtl">
                         {result.content}
                       </p>
-                      <div className="flex items-center text-xs text-slate-400">
-                        <Play className="w-3 h-3 ml-1 fill-current" />
-                        <span className="truncate max-w-[200px]">
-                          {result.episode_title}
-                        </span>
-                      </div>
                     </CardContent>
                   </Card>
                 ))}
