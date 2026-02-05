@@ -92,7 +92,7 @@ export default function Home() {
 
       {/* Hero Section */}
       <div
-        className={`w-full max-w-4xl px-6 transition-all duration-700 ease-out z-10 ${results.length > 0 || activeVideo ? "mt-8 mb-12" : "mt-[25vh]"}`}>
+        className={`w-full max-w-4xl px-6 transition-all duration-700 ease-out z-10 ${results.length > 0 || activeVideo ? "mt-8 mb-12" : "mt-[10vh]"}`}>
         <div
           className={`text-center mb-10 duration-700 transition-all flex flex-col items-center ${results.length > 0 || activeVideo ? "scale-90" : "scale-100"}`}>
           <h1 className="text-6xl md:text-8xl font-bold tracking-tight mb-6 text-black font-sans">
@@ -103,7 +103,7 @@ export default function Home() {
           </h1>
 
           <p className="text-xl md:text-2xl text-[#555] font-light max-w-2xl mx-auto leading-relaxed -mt-4">
-            لا تبحث عن الحلقة.. ابحث عن الفكرة
+            لا تبحث عن الحلقة .. ابحث عن الفكرة
           </p>
         </div>
 
