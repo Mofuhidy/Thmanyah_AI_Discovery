@@ -19,4 +19,5 @@ export interface SearchResult extends Chunk {
   similarity: number;
   episode_title: string;
   episode_url: string;
+  thumbnail_url?: string;
 }
