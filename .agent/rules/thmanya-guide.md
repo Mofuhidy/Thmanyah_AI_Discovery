@@ -41,3 +41,18 @@ Rule 6: use the skills that we have globally:
 2. UX pro max
 3. Vercel react next best practices
 4. behavioral
+
+Rule 7: The "Thamanya" Aesthetic (Visual Identity)
+Typography: Thamanya uses a distinct, clean sans-serif. Since we are on a $0 budget, use 'Readex Pro' (Google Fonts) or 'IBM Plex Sans Arabic'. Set the weight to 500 for body and 700 for headings to mimic their editorial weight.
+
+Simplicity (The 80/20 Rule): Thamanya’s design is "Content-First." Remove all borders, shadows, and gradients. Use a strict monochrome palette: #000000 (Text) and #FFFFFF (Background), with a very subtle #F9F9F9 for card backgrounds.
+
+Iconography: Use Lucide-React but keep them thin (stroke-width={1.5}) to maintain that high-end, minimal look.
+
+Rule 8: Behavioral UX (The "Discovery" Flow)
+Micro-interactions: Instead of a standard "Search" button, use an "Instant Results" pattern where results appear as the user stops typing (debounced).
+
+The "Moment" Preview: When a user clicks a result, show a small "context card" explaining the guest’s vibe at that moment before they jump to YouTube.
+
+Rule 9: Engineering for the Saudi Dialect
+Semantic Pre-processing: Since Thamanya is heavily Saudi-dialect based, add a rule for the AI: "Always normalize Saudi slang (e.g., 'وش صار', 'هقوتي') into semantic concepts before embedding to ensure the vector matches the formal Arabic transcript if Whisper formalizes it."

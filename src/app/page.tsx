@@ -39,12 +39,17 @@ export default function Home() {
       });
 
       const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Something went wrong");
+      }
+
       if (data.results) {
         setResults(data.results);
       }
     } catch (error: any) {
       console.error("Search failed", error);
-      setError(error.message || "حدث خطأ أثناء البحث");
+      setError(error.message || "فشل البحث، يرجى المحاولة مرة أخرى");
     } finally {
       setLoading(false);
     }
@@ -282,7 +287,9 @@ export default function Home() {
 }
 
 function formatTime(seconds: number) {
-  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
   const secs = Math.floor(seconds % 60);
-  return `${minutes}:${secs.toString().padStart(2, "0")}`;
+
+  return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
 }

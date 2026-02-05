@@ -2,6 +2,7 @@ export interface Episode {
   id: number;
   title: string;
   url: string; // YouTube URL
+  thumbnail_url?: string; // YouTube Thumbnail
   published_at: string;
   metadata?: Record<string, any>;
 }
