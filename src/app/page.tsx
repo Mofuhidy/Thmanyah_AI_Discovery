@@ -8,10 +8,13 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Search, Loader2, Play } from "lucide-react";
 import { SearchResult } from "@/types";
+import Image from "next/image";
 
 export default function Home() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
+  const [hasSearched, setHasSearched] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [activeVideo, setActiveVideo] = useState<{
     url: string;
@@ -24,6 +27,8 @@ export default function Home() {
 
     setLoading(true);
     setResults([]);
+    setError(null);
+    setHasSearched(true);
     setActiveVideo(null);
 
     try {
@@ -37,8 +42,9 @@ export default function Home() {
       if (data.results) {
         setResults(data.results);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Search failed", error);
+      setError(error.message || "حدث خطأ أثناء البحث");
     } finally {
       setLoading(false);
     }
@@ -57,29 +63,45 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-slate-900 text-white flex flex-col items-center">
+    <main className="min-h-screen bg-[oklch(0.92_0.02_95)] text-[#1f1f1f] flex flex-col items-center selection:bg-[#C05838]/20 font-sans relative overflow-x-hidden">
+      {/* Navbar Minimal Placeholder */}
+      <nav className="w-full max-w-7xl mx-auto p-6 flex justify-between items-center z-10">
+        <div className="text-2xl font-bold tracking-tighter text-black">
+          ثمانية
+        </div>
+        <div className="hidden md:flex gap-6 text-sm font-medium text-[#C05838]">
+          <a href="#" className="hover:opacity-80 transition-opacity">
+            عن الشركة
+          </a>
+          <a href="#" className="hover:opacity-80 transition-opacity">
+            تواصل معنا
+          </a>
+        </div>
+      </nav>
+
       {/* Hero Section */}
       <div
-        className={`w-full max-w-4xl px-6 transition-all duration-700 ease-in-out ${results.length > 0 || activeVideo ? "mt-10" : "mt-[30vh]"}`}>
-        <div className="text-center mb-8">
-          <h1 className="text-5xl md:text-7xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-teal-400 to-blue-500 tracking-tight font-sans mb-4">
-            Thamanya AI
+        className={`w-full max-w-4xl px-6 transition-all duration-700 ease-out z-10 ${results.length > 0 || activeVideo ? "mt-8 mb-12" : "mt-[25vh]"}`}>
+        <div
+          className={`text-center mb-10 duration-700 transition-all ${results.length > 0 || activeVideo ? "scale-90" : "scale-100"}`}>
+          <h1 className="text-6xl md:text-8xl font-bold tracking-tight mb-6 text-black">
+            بحث ثمانية
           </h1>
-          <p className="text-lg text-slate-300">
-            Semantic Search for Podcast Archives
+          <p className="text-xl md:text-2xl text-[#555] font-light max-w-2xl mx-auto leading-relaxed">
+            لا تبحث عن الحلقة.. ابحث عن الفكرة{" "}
           </p>
         </div>
 
         <form
           onSubmit={handleSearch}
-          className="relative w-full max-w-2xl mx-auto mb-12">
+          className="relative w-full max-w-3xl mx-auto">
           <div className="relative group">
-            <div className="absolute -inset-1 bg-gradient-to-r from-teal-400 to-blue-500 rounded-xl blur opacity-25 group-hover:opacity-75 transition duration-1000 group-hover:duration-200"></div>
-            <div className="relative flex items-center bg-slate-900 rounded-xl border border-slate-700 shadow-2xl overflow-hidden">
-              <Search className="ml-4 text-slate-400 w-6 h-6" />
+            <div className="absolute -inset-0.5 bg-[#C05838]/20 rounded-2xl blur opacity-0 group-hover:opacity-100 transition duration-500"></div>
+            <div className="relative flex items-center bg-white rounded-2xl border-2 border-[#E5E5E5] shadow-sm hover:border-[#C05838]/50 focus-within:border-[#C05838] focus-within:ring-4 focus-within:ring-[#C05838]/10 transition-all duration-300">
+              <Search className="ml-5 text-[#999] w-6 h-6" />
               <Input
-                className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent text-xl py-8 pl-4 pr-12 text-white placeholder:text-slate-500"
-                placeholder="ابحث عن لحظة محددة..."
+                className="border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent text-xl py-8 pl-16 pr-12 text-[#1f1f1f] placeholder:text-[#999] font-normal w-full"
+                placeholder="ابحث عن موضوع، ضيف، أو فكرة..."
                 value={query}
                 onChange={e => setQuery(e.target.value)}
                 dir="rtl"
@@ -87,7 +109,7 @@ export default function Home() {
               <Button
                 type="submit"
                 size="icon"
-                className="absolute left-2 h-10 w-10 bg-teal-500 hover:bg-teal-400 text-slate-900 rounded-lg transition-transform hover:scale-105 active:scale-95"
+                className="absolute left-3 h-11 w-11 bg-[#C05838] hover:bg-[#A04828] text-white rounded-xl shadow-md transition-transform hover:scale-105 active:scale-95"
                 disabled={loading}>
                 {loading ? (
                   <Loader2 className="w-5 h-5 animate-spin" />
@@ -101,102 +123,133 @@ export default function Home() {
       </div>
 
       {/* Content Area */}
-      {(results.length > 0 || activeVideo) && (
-        <div className="w-full max-w-6xl px-4 pb-20 grid grid-cols-1 lg:grid-cols-3 gap-8 animate-in fade-in slide-in-from-bottom-10 duration-700">
-          {/* Results List */}
-          <div
-            className={`lg:col-span-1 space-y-4 ${activeVideo ? "" : "lg:col-span-3 max-w-3xl mx-auto w-full"}`}>
-            <h3 className="text-xl font-semibold text-slate-200 mb-4 px-2">
-              نتائج البحث ({results.length})
-            </h3>
-            <ScrollArea
-              className={`${activeVideo ? "h-[600px]" : "h-auto"} pr-4`}>
-              <div className="space-y-4 pb-4">
-                {results.map(result => (
-                  <Card
-                    key={result.id}
-                    className="bg-[#2a1b3d]/50 border-white/5 hover:bg-[#2a1b3d] hover:border-violet-500/30 transition-all cursor-pointer group"
-                    onClick={() =>
-                      playVideo(result.episode_url, result.start_time)
-                    }>
-                    <CardContent className="p-5">
-                      <div className="flex justify-between items-start mb-3">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-2">
-                            <span className="text-violet-300 font-mono text-xs bg-violet-500/10 px-2 py-1 rounded">
-                              {formatTime(result.start_time)}
-                            </span>
-                            <h3 className="font-bold text-white truncate text-lg">
-                              {result.episode_title}
-                            </h3>
-                          </div>
+      <div className="w-full max-w-7xl px-6 pb-20 z-10">
+        {/* Messages */}
+        <div className="max-w-2xl mx-auto mb-8">
+          {error && (
+            <div className="bg-red-50 border border-red-100 text-red-600 px-6 py-4 rounded-xl text-center animate-in fade-in slide-in-from-bottom-2">
+              {error}
+            </div>
+          )}
 
-                          <p className="text-slate-300 text-sm line-clamp-2 leading-relaxed mb-4 font-light">
-                            {result.content}
-                          </p>
-
-                          {/* Thumbnail Preview */}
-                          {result.thumbnail_url && (
-                            <div className="relative w-full h-40 mb-3 rounded-lg overflow-hidden border border-white/10 group-hover:border-violet-500/20 transition-colors">
-                              <img
-                                src={result.thumbnail_url}
-                                alt={result.episode_title}
-                                className="object-cover w-full h-full opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500"
-                              />
-                              <div className="absolute inset-0 bg-gradient-to-t from-[#1c0c26]/80 to-transparent" />
-                              <div className="absolute bottom-2 right-2 bg-black/60 backdrop-blur-sm text-white text-[10px] px-1.5 py-0.5 rounded flex items-center gap-1">
-                                <Play className="w-2 h-2 fill-white" />
-                                تشغيل
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                        <Badge
-                          variant="secondary"
-                          className="bg-violet-500/10 text-violet-300 hover:bg-violet-500/20 border-violet-500/20 text-[10px] mr-2">
-                          {(result.similarity * 100).toFixed(0)}% تطابق
-                        </Badge>
-                      </div>
-                      <p
-                        className="text-slate-200 text-sm leading-relaxed mb-2 line-clamp-3 group-hover:text-white transition-colors font-light"
-                        dir="rtl">
-                        {result.content}
-                      </p>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </ScrollArea>
-          </div>
-
-          {/* Video Player */}
-          {activeVideo && (
-            <div className="lg:col-span-2 animate-in fade-in zoom-in duration-500">
-              <div className="sticky top-6">
-                <Card className="bg-black border-slate-700 overflow-hidden shadow-2xl aspect-video rounded-xl">
-                  <iframe
-                    src={activeVideo.url}
-                    title="YouTube video player"
-                    frameBorder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                    referrerPolicy="strict-origin-when-cross-origin"
-                    allowFullScreen
-                    className="w-full h-full"></iframe>
-                </Card>
-                <div className="mt-4 p-4 bg-slate-800/50 rounded-xl border border-slate-700">
-                  <h2 className="text-lg font-medium text-teal-400">
-                    جاري التشغيل
-                  </h2>
-                  <p className="text-slate-400 text-sm mt-1">
-                    تم الانتقال إلى الثانية {Math.floor(activeVideo.startTime)}{" "}
-                    بناءً على سياق البحث.
-                  </p>
-                </div>
-              </div>
+          {!loading && hasSearched && results.length === 0 && !error && (
+            <div className="text-center text-[#777] py-16 animate-in fade-in zoom-in duration-500">
+              <p className="text-xl font-medium mb-2">لم نعثر على نتائج</p>
+              <p className="text-sm opacity-70">
+                جرب كلمات مختلفة أو عبارات أعم
+              </p>
             </div>
           )}
         </div>
-      )}
+
+        {(results.length > 0 || activeVideo) && (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 animate-in fade-in slide-in-from-bottom-10 duration-700">
+            {/* Search Results Column */}
+            <div
+              className={`space-y-6 ${activeVideo ? "lg:col-span-4" : "lg:col-span-8 lg:col-start-3"}`}>
+              <div className="flex items-center justify-between px-2 pb-2 border-b border-black/5">
+                <h3 className="text-lg font-bold text-black flex items-center gap-2">
+                  نتائج البحث
+                  <span className="bg-[#C05838]/10 text-xs px-2 py-0.5 rounded-full font-mono text-[#C05838]">
+                    {results.length}
+                  </span>
+                </h3>
+              </div>
+
+              <ScrollArea
+                className={`${activeVideo ? "h-[calc(100vh-200px)]" : "h-auto"} pr-4 -mr-4`}>
+                <div className="space-y-4 pb-8 pl-2">
+                  {results.map(result => (
+                    <Card
+                      key={result.id}
+                      className="bg-white border border-[#E5E5E5] hover:border-[#C05838]/50 hover:shadow-lg transition-all cursor-pointer group overflow-hidden rounded-xl"
+                      onClick={() =>
+                        playVideo(result.episode_url, result.start_time)
+                      }>
+                      <CardContent className="p-0 flex flex-col md:flex-row">
+                        {/* Thumbnail */}
+                        {result.thumbnail_url && (
+                          <div className="relative w-full md:w-48 aspect-video md:aspect-[4/3] shrink-0 overflow-hidden bg-gray-100">
+                            <Image
+                              src={result.thumbnail_url}
+                              alt={result.episode_title}
+                              fill
+                              className="object-cover opacity-95 group-hover:scale-105 transition-all duration-700"
+                            />
+                            <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors" />
+                            <div className="absolute bottom-2 right-2 bg-black/80 backdrop-blur-sm text-white text-[10px] px-2 py-1 rounded-md flex items-center gap-1.5 font-medium">
+                              <Play className="w-2.5 h-2.5 fill-white" />
+                              <span>{formatTime(result.start_time)}</span>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Text Content */}
+                        <div className="flex-1 p-5 flex flex-col justify-between">
+                          <div>
+                            <h3 className="font-bold text-[#1f1f1f] line-clamp-1 text-lg group-hover:text-[#C05838] transition-colors mb-2">
+                              {result.episode_title}
+                            </h3>
+                            <p
+                              className="text-[#555] text-sm leading-relaxed line-clamp-2 md:line-clamp-3 font-normal"
+                              dir="rtl">
+                              {result.content}
+                            </p>
+                          </div>
+                          <div className="mt-4 flex items-center justify-between">
+                            <Badge
+                              variant="secondary"
+                              className="bg-[#FAF9F6] text-[#777] border border-[#E5E5E5] group-hover:border-[#C05838]/30 group-hover:text-[#C05838] transition-colors text-[10px] px-2 font-mono">
+                              {(result.similarity * 100).toFixed(0)}% تطابق
+                            </Badge>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </ScrollArea>
+            </div>
+
+            {/* Video Player Column */}
+            {activeVideo && (
+              <div className="lg:col-span-8 animate-in fade-in slide-in-from-left-4 duration-500 sticky top-8 self-start">
+                <div className="bg-white rounded-2xl overflow-hidden border border-[#E5E5E5] shadow-2xl">
+                  <div className="aspect-video w-full bg-black relative">
+                    <iframe
+                      src={activeVideo.url} // Now using standard iframe for guaranteed compatibility
+                      title="YouTube video player"
+                      frameBorder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      referrerPolicy="strict-origin-when-cross-origin"
+                      allowFullScreen
+                      className="absolute inset-0 w-full h-full"
+                    />
+                  </div>
+                  <div className="p-6 bg-[#FAF9F6]">
+                    <div className="flex items-center gap-3 mb-2">
+                      <span className="relative flex h-3 w-3">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#C05838] opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-3 w-3 bg-[#C05838]"></span>
+                      </span>
+                      <h2 className="text-lg font-bold text-[#1f1f1f]">
+                        جاري التشغيل
+                      </h2>
+                    </div>
+                    <p className="text-[#555] font-light">
+                      تم القفز تلقائياً إلى{" "}
+                      <span className="text-[#C05838] font-mono dir-ltr inline-block px-1 font-bold">
+                        {formatTime(activeVideo.startTime)}
+                      </span>{" "}
+                      حيث تم ذكر النص.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </main>
   );
 }
