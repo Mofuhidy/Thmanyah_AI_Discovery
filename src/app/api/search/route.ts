@@ -59,7 +59,7 @@ export async function POST(req: Request) {
 
     const { data: chunks, error } = await supabase.rpc("match_chunks", {
       query_embedding: vector,
-      match_threshold: 0.65, // Increased threshold for higher relevance
+      match_threshold: 0.78, // Strict threshold to filter out nonsense
       match_count: 10,
     });
 

@@ -12,9 +12,9 @@ export const metadata: Metadata = {
   title: "لحظة | Lahza",
   description: "محرك بحث دلالي في أرشيف ثمانية. ابحث عن الفكرة، لا الحلقة.",
   icons: {
-    icon: "/logo.png",
-    shortcut: "/logo.png",
-    apple: "/logo.png",
+    icon: "/icon.png",
+    shortcut: "/icon.png",
+    apple: "/icon.png",
   },
   openGraph: {
     title: "لحظة | Lahza",
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "/logo.png",
+        url: "/icon.png",
         width: 800,
         height: 600,
         alt: "Lahza Logo",
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "لحظة | Lahza",
     description: "لا تبحث عن الحلقة.. ابحث عن الفكرة",
-    images: ["/logo.png"],
+    images: ["/icon.png"],
   },
   keywords: [
     "ثمانية",

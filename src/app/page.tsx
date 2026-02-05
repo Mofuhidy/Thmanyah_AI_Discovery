@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Search, Loader2, Play, ArrowLeft } from "lucide-react";
@@ -73,7 +73,7 @@ export default function Home() {
       <nav className="w-full max-w-7xl mx-auto p-6 flex justify-between items-center z-10">
         <div className="relative w-28 h-24 hover:opacity-90 transition-opacity cursor-pointer">
           <Image
-            src="/logo.png"
+            src="/icon.png"
             alt="Lahza Logo"
             fill
             className="object-contain object-right"
@@ -179,52 +179,65 @@ export default function Home() {
                 className={`${activeVideo ? "h-[calc(100vh-200px)]" : "h-auto"} pr-4 -mr-4`}>
                 <div className="space-y-4 pb-8 pl-2">
                   {results.map(result => (
-                    <Card
+                    <div
                       key={result.id}
-                      className="bg-white border border-[#E5E5E5] hover:border-[#C05838]/50 hover:shadow-lg transition-all cursor-pointer group overflow-hidden rounded-xl"
+                      className="group relative flex flex-col md:flex-row gap-6 p-4 rounded-2xl hover:bg-black/[0.02] transition-colors cursor-pointer border border-transparent hover:border-black/5"
                       onClick={() =>
                         playVideo(result.episode_url, result.start_time)
                       }>
-                      <CardContent className="p-0 flex flex-col md:flex-row">
-                        {/* Thumbnail */}
-                        {result.thumbnail_url && (
-                          <div className="relative w-full md:w-48 aspect-video md:aspect-[4/3] shrink-0 overflow-hidden bg-gray-100">
-                            <Image
-                              src={result.thumbnail_url}
-                              alt={result.episode_title}
-                              fill
-                              className="object-cover opacity-95 group-hover:scale-105 transition-all duration-700"
-                            />
-                            <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors" />
-                            <div className="absolute bottom-2 right-2 bg-black/80 backdrop-blur-sm text-white text-[10px] px-2 py-1 rounded-md flex items-center gap-1.5 font-medium">
-                              <Play className="w-2.5 h-2.5 fill-white" />
-                              <span>{formatTime(result.start_time)}</span>
-                            </div>
+                      {/* Thumbnail with Play Overlay */}
+                      <div className="relative w-full md:w-56 aspect-video shrink-0 rounded-xl overflow-hidden shadow-sm">
+                        {result.thumbnail_url ? (
+                          <Image
+                            src={result.thumbnail_url}
+                            alt={result.episode_title}
+                            fill
+                            className="object-cover group-hover:scale-105 transition-transform duration-500"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-gray-100 flex items-center justify-center text-gray-300">
+                            <span className="text-xs">No Image</span>
                           </div>
                         )}
+                        <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
 
-                        {/* Text Content */}
-                        <div className="flex-1 p-5 flex flex-col justify-between">
-                          <div>
-                            <h3 className="font-bold text-[#1f1f1f] line-clamp-1 text-lg group-hover:text-[#C05838] transition-colors mb-2">
-                              {result.episode_title}
-                            </h3>
-                            <p
-                              className="text-[#555] text-sm leading-relaxed line-clamp-2 md:line-clamp-3 font-normal"
-                              dir="rtl">
-                              {result.content}
-                            </p>
-                          </div>
-                          <div className="mt-4 flex items-center justify-between">
-                            <Badge
-                              variant="secondary"
-                              className="bg-[#FAF9F6] text-[#777] border border-[#E5E5E5] group-hover:border-[#C05838]/30 group-hover:text-[#C05838] transition-colors text-[10px] px-2 font-mono">
-                              {(result.similarity * 100).toFixed(0)}% تطابق
-                            </Badge>
+                        {/* Custom Play Button */}
+                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 scale-90 group-hover:scale-100">
+                          <div className="bg-white/90 backdrop-blur-md text-[#C05838] rounded-full p-3 shadow-lg">
+                            <Play className="w-5 h-5 fill-current ml-0.5" />
                           </div>
                         </div>
-                      </CardContent>
-                    </Card>
+
+                        <div className="absolute bottom-2 right-2 bg-black/60 backdrop-blur text-white text-[10px] px-2 py-0.5 rounded-md font-mono font-medium">
+                          {formatTime(result.start_time)}
+                        </div>
+                      </div>
+
+                      {/* Content */}
+                      <div className="flex-1 flex flex-col pt-1">
+                        <div className="flex items-start justify-between gap-4 mb-2">
+                          <h3 className="font-bold text-[#1f1f1f] text-lg leading-tight group-hover:text-[#C05838] transition-colors line-clamp-1">
+                            {result.episode_title}
+                          </h3>
+                          <Badge
+                            variant="secondary"
+                            className="bg-green-50 text-green-700 hover:bg-green-100 border-green-100 text-[10px] px-2 h-6 flex-shrink-0">
+                            {(result.similarity * 100).toFixed(0)}% ملائمة
+                          </Badge>
+                        </div>
+
+                        <p
+                          className="text-[#666] text-base leading-relaxed line-clamp-3 font-normal ml-4"
+                          dir="rtl">
+                          {result.content}
+                        </p>
+
+                        <div className="mt-auto pt-4 flex items-center gap-2 text-xs text-[#999] opacity-0 group-hover:opacity-100 transition-opacity">
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#C05838]"></span>
+                          <span>اضغط للمشاهدة من هذه اللحظة</span>
+                        </div>
+                      </div>
+                    </div>
                   ))}
                 </div>
               </ScrollArea>
