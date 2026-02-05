@@ -30,7 +30,6 @@ export async function POST(req: Request) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: "models/text-embedding-004",
           content: { parts: [{ text: query }] },
         }),
         cache: "no-store", // Critical: Disable Next.js fetch caching
