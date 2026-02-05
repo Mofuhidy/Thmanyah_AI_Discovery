@@ -24,15 +24,18 @@ export async function POST(req: Request) {
     }
 
     // 1. Generate embedding via Gemini
+    // APPEND TIMESTAMP to URL to ensure Gemini request is never cached
+    const timestamp = Date.now();
     const embeddingResponse = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent?key=${GEMINI_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent?key=${GEMINI_API_KEY}&_t=${timestamp}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           content: { parts: [{ text: query }] },
         }),
-        cache: "no-store", // Critical: Disable Next.js fetch caching
+        cache: "no-store",
+        next: { revalidate: 0 }, // Extra Next.js cache busting
       },
     );
 
@@ -65,7 +68,7 @@ export async function POST(req: Request) {
     // 3. Perform Similarity Search
     const { data: chunks, error } = await supabase.rpc("match_chunks", {
       query_embedding: vector,
-      match_threshold: 0.5, // Balanced threshold
+      match_threshold: 0.3, // Lowered to 0.3 to find English/distant matches
       match_count: 10,
     });
 
