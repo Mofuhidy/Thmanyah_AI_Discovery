@@ -32,7 +32,8 @@ export default function Home() {
     setActiveVideo(null);
 
     try {
-      const res = await fetch("/api/search", {
+      // Append timestamp to prevent browser/network caching
+      const res = await fetch(`/api/search?ts=${Date.now()}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ query }),

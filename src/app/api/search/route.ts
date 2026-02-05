@@ -75,7 +75,19 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json({ results: chunks });
+    const response = NextResponse.json({ results: chunks });
+
+    // Aggressive Cache Busting Headers
+    response.headers.set(
+      "Cache-Control",
+      "no-store, no-cache, must-revalidate, proxy-revalidate",
+    );
+    response.headers.set("Pragma", "no-cache");
+    response.headers.set("Expires", "0");
+    response.headers.set("Surrogate-Control", "no-store");
+    response.headers.set("X-Debug-Query", encodeURIComponent(query)); // Echo query to verify backend received it
+
+    return response;
   } catch (err) {
     console.error("Search API Error:", err);
     return NextResponse.json(
