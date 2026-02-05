@@ -32,7 +32,7 @@ begin
   from chunks c
   join episodes e on c.episode_id = e.id
   where 1 - (c.embedding <=> query_embedding) > match_threshold
-  order by similarity desc, start_time asc -- Secondary sort: Earlier content first
+  order by start_time asc, similarity desc -- Primary sort: Chronological order
   limit match_count;
 end;
 $$;
