@@ -1,6 +1,6 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# لحظة | Lahza - Semantic Search for Thmanyah
 
-## Getting Started
+An AI-powered semantic search engine for the Thmanyah podcast archive. Built with Next.js, Supabase, and Google Gemini.
 
 First, run the development server:
 
