@@ -1,15 +1,16 @@
 import type { Metadata } from "next";
-import { Readex_Pro } from "next/font/google";
+import { IBM_Plex_Sans_Arabic } from "next/font/google"; // Updated Font
 import "./globals.css";
 
-const readexPro = Readex_Pro({
-  variable: "--font-readex-pro",
-  subsets: ["arabic", "latin"],
+const ibmPlexSansArabic = IBM_Plex_Sans_Arabic({
+  variable: "--font-ibm-plex-sans-arabic",
+  subsets: ["arabic"],
+  weight: ["100", "200", "300", "400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
-  title: "Thamanya AI Discovery",
-  description: "Semantic search engine for Thamanya Podcast",
+  title: "لحظة | Lahza",
+  description: "محرك بحث دلالي في أرشيف ثمانية",
 };
 
 export default function RootLayout({
@@ -19,7 +20,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ar" dir="rtl">
-      <body className={`${readexPro.variable} antialiased font-sans`}>
+      <body className={`${ibmPlexSansArabic.variable} antialiased font-sans`}>
         {children}
       </body>
     </html>
