@@ -31,6 +31,7 @@ export async function POST(req: Request) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           content: { parts: [{ text: query }] },
+          outputDimensionality: 768, // Force 768 dimensions to match DB schema
         }),
         cache: "no-store",
         next: { revalidate: 0 }, // Extra Next.js cache busting
