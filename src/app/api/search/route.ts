@@ -24,10 +24,8 @@ export async function POST(req: Request) {
     }
 
     // 1. Generate embedding via Gemini
-    // APPEND TIMESTAMP to URL to ensure Gemini request is never cached
-    const timestamp = Date.now();
     const embeddingResponse = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent?key=${GEMINI_API_KEY}&_t=${timestamp}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent?key=${GEMINI_API_KEY}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
