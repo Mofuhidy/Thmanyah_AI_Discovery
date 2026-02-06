@@ -67,7 +67,7 @@ export async function POST(req: Request) {
     // 3. Perform Similarity Search
     const { data: chunks, error } = await supabase.rpc("match_chunks", {
       query_embedding: vector,
-      match_threshold: 0.3, // Lowered to 0.3 to find English/distant matches
+      match_threshold: 0.55, // Increased to filter out noise (noise level ~0.52)
       match_count: 10,
     });
 
