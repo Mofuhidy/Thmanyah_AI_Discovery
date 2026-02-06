@@ -10,7 +10,7 @@ if (!VERCEL_URL) {
   process.exit(1);
 }
 
-const BATCH_SIZE = 5;
+const BATCH_SIZE = 2;
 
 async function triggerBatch(offset) {
   const url = `${VERCEL_URL}/api/reindex?secret=${SECRET}&offset=${offset}&limit=${BATCH_SIZE}`;
