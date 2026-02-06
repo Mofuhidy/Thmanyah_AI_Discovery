@@ -23,8 +23,10 @@ export default function Home() {
   } | null>(null);
 
   // Filter State
-  const [episodes, setEpisodes] = useState<{ id: number; title: string }[]>([]);
-  const [selectedEpisode, setSelectedEpisode] = useState<string>("");
+  const [_episodes, setEpisodes] = useState<{ id: number; title: string }[]>(
+    [],
+  );
+  const [selectedEpisode, _setSelectedEpisode] = useState<string>("");
   const [showAbout, setShowAbout] = useState(false);
 
   // Fetch Episodes on Mount
@@ -130,7 +132,7 @@ export default function Home() {
         </div>
 
         {/* Filter Dropdown */}
-        <div className="w-full max-w-3xl mx-auto mb-4 flex justify-end">
+        {/* <div className="w-full max-w-3xl mx-auto mb-4 flex justify-end">
           <select
             value={selectedEpisode}
             onChange={e => setSelectedEpisode(e.target.value)}
@@ -143,7 +145,7 @@ export default function Home() {
               </option>
             ))}
           </select>
-        </div>
+        </div> */}
 
         <form
           onSubmit={handleSearch}
