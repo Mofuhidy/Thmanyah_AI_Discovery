@@ -6,9 +6,10 @@ import { Button } from "@/components/ui/button";
 
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Search, Loader2, Play, ArrowLeft } from "lucide-react";
+import { Search, Loader2, Play, ArrowLeft, Copy, Check } from "lucide-react";
 import { SearchResult } from "@/types";
 import Image from "next/image";
+import { supabase } from "@/lib/supabase"; // Import Supabase Client
 
 export default function Home() {
   const [query, setQuery] = useState("");
@@ -20,6 +21,22 @@ export default function Home() {
     url: string;
     startTime: number;
   } | null>(null);
+
+  // Filter State
+  const [episodes, setEpisodes] = useState<{ id: number; title: string }[]>([]);
+  const [selectedEpisode, setSelectedEpisode] = useState<string>("");
+
+  // Fetch Episodes on Mount
+  useState(() => {
+    const fetchEpisodes = async () => {
+      const { data } = await supabase
+        .from("episodes")
+        .select("id, title")
+        .order("id", { ascending: false });
+      if (data) setEpisodes(data);
+    };
+    fetchEpisodes();
+  });
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,7 +53,10 @@ export default function Home() {
       const res = await fetch(`/api/search?ts=${Date.now()}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query }),
+        body: JSON.stringify({
+          query,
+          filter_episode: selectedEpisode ? parseInt(selectedEpisode) : null,
+        }),
         cache: "no-store",
       });
 
@@ -70,7 +90,7 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-[oklch(0.92_0.02_95)] text-[#1f1f1f] flex flex-col items-center selection:bg-[#C05838]/20 font-sans relative overflow-x-hidden">
+    <main className="min-h-screen bg-[oklch(0.92_0.02_95)] text-[#1f1f1f] flex flex-col items-center selection:bg-[#DB3C1D]/20 font-sans relative overflow-x-hidden">
       {/* Navbar Minimal Placeholder */}
       <nav className="w-full max-w-7xl mx-auto p-6 flex justify-between items-center z-10">
         <div className="relative w-28 h-24 hover:opacity-90 transition-opacity cursor-pointer">
@@ -82,7 +102,7 @@ export default function Home() {
             priority
           />
         </div>
-        <div className="hidden md:flex gap-6 text-sm font-medium text-[#C05838]">
+        <div className="hidden md:flex gap-6 text-sm font-semibold text-[#DB3C1D]">
           <a href="#" className="hover:opacity-80 transition-opacity">
             عن الشركة
           </a>
@@ -99,24 +119,40 @@ export default function Home() {
           className={`text-center mb-10 duration-700 transition-all flex flex-col items-center ${results.length > 0 || activeVideo ? "scale-90" : "scale-100"}`}>
           <h1 className="text-6xl md:text-8xl font-bold tracking-tight mb-6 text-black font-sans">
             لحظة{" "}
-            <span className="text-[#C05838] font-light text-5xl md:text-7xl">
+            <span className="text-[#DB3C1D] font-semibold text-5xl md:text-7xl">
               | Lahza
             </span>
           </h1>
 
-          <p className="text-xl md:text-2xl text-[#555] font-light max-w-2xl mx-auto leading-relaxed -mt-4">
+          <p className="text-xl md:text-2xl text-[#555] font-semibold max-w-2xl mx-auto leading-relaxed -mt-4">
             لا تبحث عن الحلقة .. ابحث عن الفكرة
           </p>
+        </div>
+
+        {/* Filter Dropdown */}
+        <div className="w-full max-w-3xl mx-auto mb-4 flex justify-end">
+          <select
+            value={selectedEpisode}
+            onChange={e => setSelectedEpisode(e.target.value)}
+            className="bg-transparent text-sm text-[#777] border-0 outline-none cursor-pointer hover:text-[#DB3C1D] transition-colors dir-rtl text-right appearance-none"
+            dir="rtl">
+            <option value="">كل الحلقات ({episodes.length})</option>
+            {episodes.map(ep => (
+              <option key={ep.id} value={ep.id}>
+                {ep.title}
+              </option>
+            ))}
+          </select>
         </div>
 
         <form
           onSubmit={handleSearch}
           className="relative w-full max-w-3xl mx-auto">
           <div className="relative group">
-            <div className="absolute -inset-0.5 bg-[#C05838]/10 rounded-full blur-sm opacity-0 group-hover:opacity-100 transition duration-500"></div>
-            <div className="relative flex items-center bg-white rounded-full border border-[#E5E5E5] shadow-sm hover:border-[#C05838]/50 hover:shadow-md focus-within:border-[#C05838] focus-within:ring-4 focus-within:ring-[#C05838]/5 transition-all duration-300 h-16">
+            <div className="absolute -inset-0.5 bg-[#DB3C1D]/10 rounded-full blur-sm opacity-0 group-hover:opacity-100 transition duration-500"></div>
+            <div className="relative flex items-center bg-white rounded-full border border-[#E5E5E5] shadow-sm hover:border-[#DB3C1D]/50 hover:shadow-md focus-within:border-[#DB3C1D] focus-within:ring-4 focus-within:ring-[#DB3C1D]/5 transition-all duration-300 h-16">
               <div className="flex items-center justify-center w-14 h-full pointer-events-none">
-                <Search className="text-[#C05838] w-6 h-6 opacity-70" />
+                <Search className="text-[#DB3C1D] w-6 h-6 opacity-70" />
               </div>
               <Input
                 className="flex-1 border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent text-xl h-full px-2 text-[#1f1f1f] placeholder:text-[#999] font-normal"
@@ -129,7 +165,7 @@ export default function Home() {
                 <Button
                   type="submit"
                   size="icon"
-                  className="h-12 w-12 rounded-full bg-white hover:bg-[#FAF9F6] text-[#C05838] border border-transparent hover:border-[#E5E5E5] transition-all ml-2"
+                  className="h-12 w-12 rounded-full bg-white hover:bg-[#FAF9F6] text-[#DB3C1D] border border-transparent hover:border-[#E5E5E5] transition-all ml-2"
                   disabled={loading}>
                   {loading ? (
                     <Loader2 className="w-5 h-5 animate-spin" />
@@ -171,7 +207,7 @@ export default function Home() {
               <div className="flex items-center justify-between px-2 pb-2 border-b border-black/5">
                 <h3 className="text-lg font-bold text-black flex items-center gap-2">
                   نتائج البحث
-                  <span className="bg-[#C05838]/10 text-xs px-2 py-0.5 rounded-full font-mono text-[#C05838]">
+                  <span className="bg-[#DB3C1D]/10 text-xs px-2 py-0.5 rounded-full font-mono text-[#DB3C1D]">
                     {results.length}
                   </span>
                 </h3>
@@ -204,7 +240,7 @@ export default function Home() {
 
                         {/* Custom Play Button */}
                         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 scale-90 group-hover:scale-100">
-                          <div className="bg-white/90 backdrop-blur-md text-[#C05838] rounded-full p-3 shadow-lg">
+                          <div className="bg-white/90 backdrop-blur-md text-[#DB3C1D] rounded-full p-3 shadow-lg">
                             <Play className="w-5 h-5 fill-current ml-0.5" />
                           </div>
                         </div>
@@ -217,7 +253,7 @@ export default function Home() {
                       {/* Content */}
                       <div className="flex-1 flex flex-col pt-1">
                         <div className="flex items-start justify-between gap-4 mb-2">
-                          <h3 className="font-bold text-[#1f1f1f] text-lg leading-tight group-hover:text-[#C05838] transition-colors line-clamp-1">
+                          <h3 className="font-bold text-[#1f1f1f] text-lg leading-tight group-hover:text-[#DB3C1D] transition-colors line-clamp-1">
                             {result.episode_title}
                           </h3>
                           <Badge
@@ -233,9 +269,27 @@ export default function Home() {
                           {result.content}
                         </p>
 
-                        <div className="mt-auto pt-4 flex items-center gap-2 text-xs text-[#999] opacity-0 group-hover:opacity-100 transition-opacity">
-                          <span className="w-1.5 h-1.5 rounded-full bg-[#C05838]"></span>
-                          <span>اضغط للمشاهدة من هذه اللحظة</span>
+                        <div className="mt-auto pt-4 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="flex items-center gap-2 text-xs text-[#999]">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#DB3C1D]"></span>
+                            <span>اضغط للمشاهدة من هذه اللحظة</span>
+                          </div>
+                          <button
+                            onClick={e => {
+                              e.stopPropagation();
+                              navigator.clipboard.writeText(result.content);
+                              const btn = e.currentTarget;
+                              const original = btn.innerHTML;
+                              btn.innerHTML =
+                                '<span class="text-green-600 flex items-center gap-1 text-xs font-bold">تم النسخ <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check"><path d="M20 6 9 17l-5-5"/></svg></span>';
+                              setTimeout(() => {
+                                btn.innerHTML = original;
+                              }, 2000);
+                            }}
+                            className="text-[#999] hover:text-[#1f1f1f] p-1.5 rounded-md hover:bg-black/5 transition-colors"
+                            title="نسخ النص">
+                            <Copy className="w-4 h-4" />
+                          </button>
                         </div>
                       </div>
                     </div>
@@ -286,14 +340,14 @@ export default function Home() {
                   <div className="p-6 bg-[#1A1A1A] text-white">
                     <div className="flex items-center gap-3 mb-2">
                       <span className="relative flex h-3 w-3">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#C05838] opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-3 w-3 bg-[#C05838]"></span>
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#DB3C1D] opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-3 w-3 bg-[#DB3C1D]"></span>
                       </span>
                       <h2 className="text-lg font-bold">جاري التشغيل</h2>
                     </div>
                     <p className="text-gray-400 font-light">
                       تم القفز تلقائياً إلى{" "}
-                      <span className="text-[#C05838] font-mono dir-ltr inline-block px-1 font-bold">
+                      <span className="text-[#DB3C1D] font-mono dir-ltr inline-block px-1 font-bold">
                         {formatTime(activeVideo.startTime)}
                       </span>{" "}
                       حيث تم ذكر النص.
@@ -314,7 +368,7 @@ export default function Home() {
             href="https://www.linkedin.com/in/mo-fuhidy/"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[#C05838] hover:text-[#A04828] transition-colors decoration-wavy underline-offset-4 hover:underline">
+            className="text-[#DB3C1D] hover:text-[#A04828] transition-colors decoration-wavy underline-offset-4 hover:underline">
             Fuhidy
           </a>
         </p>

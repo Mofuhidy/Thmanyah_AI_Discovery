@@ -7,26 +7,26 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY!;
 
-const REINDEX_SECRET = "temp-reindex-2026"; // Simple protection
-
 export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url);
-  const secret = searchParams.get("secret");
-  const offset = parseInt(searchParams.get("offset") || "0");
-  const limit = parseInt(searchParams.get("limit") || "5"); // Small batch to avoid execution timeout
-
-  if (secret !== REINDEX_SECRET) {
+  // 1. Security Check: CRON_SECRET or Bearer Token
+  const authHeader = req.headers.get("authorization");
+  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  // 2. Parse Params
+  const { searchParams } = new URL(req.url);
+  const offset = parseInt(searchParams.get("offset") || "0");
+  const limit = parseInt(searchParams.get("limit") || "5"); // Small batch to avoid execution timeout
 
   if (!supabaseUrl || !supabaseKey || !GEMINI_API_KEY) {
     return NextResponse.json({ error: "Missing Config" }, { status: 500 });
   }
 
-  // 1. Init Supabase (Direct RPC or REST? Client is fine on Edge)
+  // 3. Init Supabase
   const supabase = createClient(supabaseUrl, supabaseKey);
 
-  // 2. Fetch Chunks (Range)
+  // 4. Fetch Chunks (Range)
   const { data: chunks, error } = await supabase
     .from("chunks")
     .select("id, content")
@@ -43,7 +43,7 @@ export async function GET(req: Request) {
 
   const results = [];
 
-  // 3. Process Each Chunk
+  // 5. Process Each Chunk
   for (const chunk of chunks) {
     try {
       // A. Generate Embedding
@@ -87,7 +87,7 @@ export async function GET(req: Request) {
     }
   }
 
-  // 4. Return Summary (Client can calculate next offset)
+  // 6. Return Summary
   return NextResponse.json({
     message: "Batch processed",
     processed: results.length,
