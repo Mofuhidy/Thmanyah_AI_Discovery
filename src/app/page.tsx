@@ -25,6 +25,7 @@ export default function Home() {
   // Filter State
   const [episodes, setEpisodes] = useState<{ id: number; title: string }[]>([]);
   const [selectedEpisode, setSelectedEpisode] = useState<string>("");
+  const [showAbout, setShowAbout] = useState(false);
 
   // Fetch Episodes on Mount
   useState(() => {
@@ -102,13 +103,12 @@ export default function Home() {
             priority
           />
         </div>
-        <div className="hidden md:flex gap-6 text-sm font-semibold text-[#DB3C1D]">
-          <a href="#" className="hover:opacity-80 transition-opacity">
-            عن الشركة
-          </a>
-          <a href="#" className="hover:opacity-80 transition-opacity">
-            تواصل معنا
-          </a>
+        <div className="flex gap-4 md:gap-6 text-xs md:text-sm font-semibold text-[#DB3C1D]">
+          <button
+            onClick={() => setShowAbout(true)}
+            className="cursor-pointer text-[#DB3C1D] hover:text-[#c94f34] transition-colors decoration-wavy underline-offset-4 hover:underline">
+            عن المشروع
+          </button>
         </div>
       </nav>
 
@@ -356,6 +356,140 @@ export default function Home() {
                 </div>
               </div>
             )}
+          </div>
+        )}
+
+        {/* About Modal */}
+        {showAbout && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300"
+            onClick={() => setShowAbout(false)}>
+            <div
+              className="relative w-full max-w-2xl bg-white rounded-3xl overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300 p-10 text-center"
+              onClick={e => e.stopPropagation()}>
+              <button
+                onClick={() => setShowAbout(false)}
+                className="absolute top-4 right-4 p-2 bg-gray-100 hover:bg-gray-200 text-gray-500 rounded-full transition-all">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round">
+                  <path d="M18 6 6 18" />
+                  <path d="m6 6 12 12" />
+                </svg>
+              </button>
+
+              <div className="mb-6">
+                <div className="w-16 h-16 bg-[#DB3C1D]/10 text-[#DB3C1D] rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="32"
+                    height="32"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="lucide lucide-heart">
+                    <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+                  </svg>
+                </div>
+                <h2 className="text-2xl font-bold text-[#1f1f1f] mb-1">
+                  عن المشروع
+                </h2>
+                <p className="text-sm text-[#777]">من اليمن، بحب</p>
+              </div>
+
+              <div
+                className="space-y-6 text-lg leading-relaxed text-[#555] font-light"
+                dir="rtl">
+                <p>
+                  "أنا{" "}
+                  <span className="font-bold text-[#DB3C1D]">محمد الفهيدي</span>
+                  ، مهندس برمجيات من اليمن.
+                </p>
+                <p>
+                  بنيت{" "}
+                  <span className="font-semibold text-[#1f1f1f]">لحظة</span> ليس
+                  فقط كأداة تقنية، بل كرسالة شكر لثمانية على المحتوى الذي أثرى
+                  عقلي.
+                </p>
+                <p>
+                  المشروع يثبت أن الشغف قادر على كسر{" "}
+                  <span className="bg-[#DB3C1D]/10 text-[#DB3C1D] px-2 py-0.5 rounded-md text-base">
+                    جدران الحماية
+                  </span>
+                  ، وقيود الميزانية، ومحدودية العتاد."
+                </p>
+              </div>
+
+              <div className="mt-8 pt-8 border-t border-gray-100 flex justify-center gap-4">
+                <a
+                  href="https://twitter.com/mofuhidy"
+                  target="_blank"
+                  className="text-[#777] hover:text-[#DB3C1D] transition-colors">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="lucide lucide-twitter">
+                    <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z" />
+                  </svg>
+                </a>
+                <a
+                  href="https://github.com/mofuhidy"
+                  target="_blank"
+                  className="text-[#777] hover:text-[#DB3C1D] transition-colors">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="lucide lucide-github">
+                    <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4" />
+                    <path d="M9 18c-4.51 2-5-2-7-2" />
+                  </svg>
+                </a>
+                <a
+                  href="https://linkedin.com/in/mo-fuhidy"
+                  target="_blank"
+                  className="text-[#777] hover:text-[#DB3C1D] transition-colors">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="lucide lucide-linkedin">
+                    <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
+                    <rect width="4" height="12" x="2" y="9" />
+                    <circle cx="4" cy="4" r="2" />
+                  </svg>
+                </a>
+              </div>
+            </div>
           </div>
         )}
       </div>
