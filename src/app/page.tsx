@@ -166,8 +166,8 @@ export default function Home() {
         {(results.length > 0 || activeVideo) && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 animate-in fade-in slide-in-from-bottom-10 duration-700">
             {/* Search Results Column */}
-            <div
-              className={`space-y-6 ${activeVideo ? "lg:col-span-4" : "lg:col-span-8 lg:col-start-3"}`}>
+            {/* Search Results Column */}
+            <div className="lg:col-span-8 lg:col-start-3 space-y-6">
               <div className="flex items-center justify-between px-2 pb-2 border-b border-black/5">
                 <h3 className="text-lg font-bold text-black flex items-center gap-2">
                   نتائج البحث
@@ -177,8 +177,7 @@ export default function Home() {
                 </h3>
               </div>
 
-              <ScrollArea
-                className={`${activeVideo ? "h-[calc(100vh-200px)]" : "h-auto"} pr-4 -mr-4`}>
+              <ScrollArea className="h-auto pr-4 -mr-4">
                 <div className="space-y-4 pb-8 pl-2">
                   {results.map(result => (
                     <div
@@ -245,13 +244,37 @@ export default function Home() {
               </ScrollArea>
             </div>
 
-            {/* Video Player Column */}
+            {/* Video Player Modal Overlay */}
             {activeVideo && (
-              <div className="lg:col-span-8 animate-in fade-in slide-in-from-left-4 duration-500 sticky top-8 self-start">
-                <div className="bg-white rounded-2xl overflow-hidden border border-[#E5E5E5] shadow-2xl">
+              <div
+                className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-300"
+                onClick={() => setActiveVideo(null)}>
+                <div
+                  className="relative w-full max-w-4xl bg-black rounded-3xl overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300 border border-white/10"
+                  onClick={e => e.stopPropagation()}>
+                  {/* Close Button */}
+                  <button
+                    onClick={() => setActiveVideo(null)}
+                    className="absolute top-4 right-4 z-10 p-2 bg-black/50 hover:bg-black/80 text-white/70 hover:text-white rounded-full backdrop-blur-md transition-all">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="lucide lucide-x">
+                      <path d="M18 6 6 18" />
+                      <path d="m6 6 12 12" />
+                    </svg>
+                  </button>
+
                   <div className="aspect-video w-full bg-black relative">
                     <iframe
-                      src={activeVideo.url} // Now using standard iframe for guaranteed compatibility
+                      src={activeVideo.url}
                       title="YouTube video player"
                       frameBorder="0"
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -260,17 +283,15 @@ export default function Home() {
                       className="absolute inset-0 w-full h-full"
                     />
                   </div>
-                  <div className="p-6 bg-[#FAF9F6]">
+                  <div className="p-6 bg-[#1A1A1A] text-white">
                     <div className="flex items-center gap-3 mb-2">
                       <span className="relative flex h-3 w-3">
                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#C05838] opacity-75"></span>
                         <span className="relative inline-flex rounded-full h-3 w-3 bg-[#C05838]"></span>
                       </span>
-                      <h2 className="text-lg font-bold text-[#1f1f1f]">
-                        جاري التشغيل
-                      </h2>
+                      <h2 className="text-lg font-bold">جاري التشغيل</h2>
                     </div>
-                    <p className="text-[#555] font-light">
+                    <p className="text-gray-400 font-light">
                       تم القفز تلقائياً إلى{" "}
                       <span className="text-[#C05838] font-mono dir-ltr inline-block px-1 font-bold">
                         {formatTime(activeVideo.startTime)}
@@ -284,6 +305,7 @@ export default function Home() {
           </div>
         )}
       </div>
+
       {/* Footer */}
       <footer className="w-full py-8 mt-auto text-center text-[#777] text-sm font-medium z-10 animate-in fade-in duration-1000 delay-500">
         <p>
