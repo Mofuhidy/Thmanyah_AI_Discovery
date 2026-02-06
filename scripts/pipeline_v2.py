@@ -4,71 +4,70 @@ import whisper
 import google.generativeai as genai
 from supabase import create_client, Client
 from google.colab import userdata
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import os
 import time
-import re
+from dotenv import load_dotenv
+
+# Load local env if present (ignore on Colab)
+load_dotenv('.env.local')
 
 # ---------------------------------------------------------
 # CONFIGURATION
 # ---------------------------------------------------------
 
-# Retrieve Secrets (Colab or Local)
+# 👇 CONFIGURATION 👇
+VIDEO_URL = "https://youtu.be/QPTwsoa47do" 
+WHISPER_MODEL = "small" # Use "medium" for GPU, "small" for CPU (to be faster)
+
+FILENAME = "episode.mp3"
+CLEANING_MODEL = "gemini-1.5-flash"
+
+# ---------------------------------------------------------
+# SETUP
+# ---------------------------------------------------------
 try:
     SUPABASE_URL = userdata.get('SUPABASE_URL') or os.getenv('SUPABASE_URL')
     SUPABASE_KEY = userdata.get('SUPABASE_KEY') or os.getenv('SUPABASE_KEY')
     GEMINI_API_KEY = userdata.get('GEMINI_API_KEY') or os.getenv('GEMINI_API_KEY')
 except:
-    SUPABASE_URL = "" # User must fill if running locally without env vars
+    SUPABASE_URL = ""
     SUPABASE_KEY = ""
     GEMINI_API_KEY = ""
 
 if not SUPABASE_URL or not GEMINI_API_KEY:
-    print("⚠️  MISSING SECRETS! Please set SUPABASE_URL, SUPABASE_KEY, and GEMINI_API_KEY.")
-    # Stop execution if important keys are missing? For now, we'll let it error out later if not filled.
+    print("⚠️  MISSING SECRETS! Check Colab Keys or .env.local")
 
 genai.configure(api_key=GEMINI_API_KEY)
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
-# Whisper Model
-whisper_model = whisper.load_model("medium") # Good balance for Arabic
-CLEANING_MODEL = "gemini-1.5-flash" # Fast, Free-tier friendly. (Use 'gemini-2.0-flash-exp' for bleeding edge)
 
 # ---------------------------------------------------------
 # HELPER FUNCTIONS
 # ---------------------------------------------------------
 
 def clean_transcript_with_gemini(text):
-    """
-    Uses Gemini to clean the transcript.
-    Removes stutters, repeated words, and fixes punctuation while keeping the dialect.
-    """
+    """Clean text using Gemini 1.5 Flash."""
     model = genai.GenerativeModel(CLEANING_MODEL)
-    
     prompt = f"""
     You are a professional Arabic editor. 
     Clean the following transcript from a Saudi podcast.
-    
     Rules:
     1. Remove stutters (e.g., "أنا أنا كنت" -> "أنا كنت").
-    2. Remove filler words if they add no meaning (e.g., "يعني يعني").
-    3. Fix punctuation to make it readable.
-    4. **CRITICAL**: Do NOT change the dialect or words. Keep "وش صار" as "وش صار", do not change to "ماذا حدث".
+    2. Remove filler words if they add no meaning.
+    3. Fix punctuation.
+    4. Keep the Saudi dialect (e.g. keep "وش صار").
     5. Return ONLY the cleaned text.
-
-    Text:
-    "{text}"
+    Text: "{text}"
     """
-    
     try:
         response = model.generate_content(prompt)
         return response.text.strip()
     except Exception as e:
-        print(f"  ⚠️ Gemini Cleaning Error: {e}")
-        return text # Fallback to original if AI fails
+        print(f"  ⚠️ Cleaning Error: {e}")
+        return text
 
 def get_embedding_v2(text, retries=5):
-    """
-    Generates embedding using the CORRECT model and dimensions.
-    """
+    """Generate 768-dim embedding."""
     for attempt in range(retries):
         try:
             return genai.embed_content(
@@ -80,14 +79,11 @@ def get_embedding_v2(text, retries=5):
             if attempt < retries - 1:
                 time.sleep(2 * (attempt + 1))
             else:
-                raise e
+                return None
 
 # ---------------------------------------------------------
 # MAIN PIPELINE
 # ---------------------------------------------------------
-
-VIDEO_URL = "YOUR_VIDEO_URL_HERE" # <--- PASTE URL HERE
-FILENAME = "episode.mp3"
 
 # 1. Download
 print(f"\n⬇️  Downloading: {VIDEO_URL}...")
@@ -103,81 +99,74 @@ with yt_dlp.YoutubeDL(ydl_opts) as ydl:
     video_title = info.get('title', 'Unknown Title')
     video_id = info.get('id')
     thumbnail_url = info.get('thumbnail')
-
 print(f"✅ Downloaded: {video_title}")
 
 # 2. Transcribe
-print(f"🎙️  Transcribing (Whisper Medium)...")
-result = whisper_model.transcribe(
-    FILENAME,
-    verbose=False, # Quieter output
-    language="ar",
-    initial_prompt="هذا بودكاست باللغة العربية يتحدث عن ريادة الأعمال والبزنس، باللهجة السعودية."
-)
+print(f"🎙️  Transcribing (Whisper {WHISPER_MODEL})...")
+whisper_model = whisper.load_model(WHISPER_MODEL)
+result = whisper_model.transcribe(FILENAME, language="ar", initial_prompt="بودكاست سعودي ريادة أعمال")
 segments = result['segments']
 print(f"✅ Transcribed {len(segments)} segments.")
 
-# 3. Save Episode to DB
-print(f"💾 Saving Episode metadata...")
-response = supabase.table('episodes').upsert({
+# 3. Save Metadata
+print(f"💾 Saving Episode Metadata...")
+# Step A: Upsert
+supabase.table('episodes').upsert({
     'video_id': video_id,
     'title': video_title,
     'url': f"https://www.youtube.com/watch?v={video_id}",
     'thumbnail_url': thumbnail_url
-}, on_conflict='video_id').select().execute()
+}, on_conflict='video_id').execute()
 
+# Step B: Select ID
+response = supabase.table('episodes').select('id').eq('video_id', video_id).execute()
 episode_int_id = response.data[0]['id']
 print(f"✅ Episode ID: {episode_int_id}")
 
-# 4. Process Chunks (The Logic)
-print("🧠 Processing Chunks (Cleaning & Embedding)...")
+# 4. Parallel Processing
+print("🧠 Processing Chunks (Cleaning & Embedding) in PARALLEL...")
 
-chunks_to_insert = []
+raw_chunks = []
 current_buffer = ""
 current_start = 0
-
-# Adjust this limit for chunk size (approx 30-60 secs of speech)
-CHAR_LIMIT = 800 
+CHAR_LIMIT = 800
 
 for i, segment in enumerate(segments):
     text = segment['text']
-    start = segment['start']
-    
-    # Initialize start time for the new buffer
-    if not current_buffer:
-        current_start = start
-    
+    if not current_buffer: current_start = segment['start']
     current_buffer += " " + text
-    
-    # If buffer is full, process it
     if len(current_buffer) >= CHAR_LIMIT or i == len(segments) - 1:
-        raw_text = current_buffer.strip()
-        
-        # A. Clean Text
-        print(f"  ✨ Cleaning Chunk {len(chunks_to_insert)+1}...", end="\r")
-        cleaned_text = clean_transcript_with_gemini(raw_text)
-        
-        # B. Embed Text
-        embedding = get_embedding_v2(cleaned_text)
-        
-        # C. Add to List
-        chunks_to_insert.append({
-            'episode_id': episode_int_id,
-            'content': cleaned_text, # Storing the CLEAN text
-            'start_time': current_start,
-            'end_time': segment['end'],
-            'embedding': embedding
-        })
-        
-        # Reset
+        raw_chunks.append({'text': current_buffer.strip(), 'start': current_start, 'end': segment['end']})
         current_buffer = ""
 
-# 5. Batch Insert
-print(f"\n🚀 Inserting {len(chunks_to_insert)} chunks into Supabase...")
-BATCH_SIZE = 50
-for i in range(0, len(chunks_to_insert), BATCH_SIZE):
-    batch = chunks_to_insert[i:i+BATCH_SIZE]
-    supabase.table('chunks').upsert(batch).execute()
-    print(f"  written {i + len(batch)} / {len(chunks_to_insert)}")
+def process_single_chunk(chunk_data):
+    try:
+        cleaned = clean_transcript_with_gemini(chunk_data['text'])
+        emb = get_embedding_v2(cleaned)
+        if not emb: return None
+        return {
+            'episode_id': episode_int_id,
+            'content': cleaned,
+            'start_time': chunk_data['start'],
+            'end_time': chunk_data['end'],
+            'embedding': emb
+        }
+    except: return None
 
-print("\n🎉 DONE! Phase 2 Processing Complete.")
+chunks_to_insert = []
+with ThreadPoolExecutor(max_workers=5) as executor:
+    futures = [executor.submit(process_single_chunk, c) for c in raw_chunks]
+    for i, future in enumerate(as_completed(futures)):
+        res = future.result()
+        if res: chunks_to_insert.append(res)
+        print(f"  ✨ {i+1}/{len(raw_chunks)}", end="\r")
+
+chunks_to_insert.sort(key=lambda x: x['start_time'])
+
+# 5. Insert
+print(f"\n🚀 Inserting {len(chunks_to_insert)} chunks...")
+for i in range(0, len(chunks_to_insert), 50):
+    supabase.table('chunks').upsert(chunks_to_insert[i:i+50]).execute()
+    print(f"  written {i + 50}")
+
+print("\n🎉 DONE! Video Processed Successfully.")

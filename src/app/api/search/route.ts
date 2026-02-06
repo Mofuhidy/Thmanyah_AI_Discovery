@@ -11,7 +11,7 @@ const GEMINI_API_KEY = process.env.GEMINI_API_KEY!;
 
 export async function POST(req: Request) {
   try {
-    const { query } = await req.json();
+    const { query, filter_episode } = await req.json();
 
     if (!query)
       return NextResponse.json({ error: "Query required" }, { status: 400 });
@@ -69,6 +69,7 @@ export async function POST(req: Request) {
       query_embedding: vector,
       match_threshold: 0.55, // Increased to filter out noise (noise level ~0.52)
       match_count: 10,
+      filter_episode_id: filter_episode || null, // Optional filter
     });
 
     if (error) {
