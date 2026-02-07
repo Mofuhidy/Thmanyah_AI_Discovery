@@ -6,10 +6,9 @@ import { Button } from "@/components/ui/button";
 
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Search, Loader2, Play, ArrowLeft, Copy, Check } from "lucide-react";
+import { Search, Loader2, Play, ArrowLeft, Copy } from "lucide-react";
 import { SearchResult } from "@/types";
 import Image from "next/image";
-import { supabase } from "@/lib/supabase"; // Import Supabase Client
 
 export default function Home() {
   const [query, setQuery] = useState("");
@@ -22,24 +21,7 @@ export default function Home() {
     startTime: number;
   } | null>(null);
 
-  // Filter State
-  const [_episodes, setEpisodes] = useState<{ id: number; title: string }[]>(
-    [],
-  );
-  const [selectedEpisode, _setSelectedEpisode] = useState<string>("");
   const [showAbout, setShowAbout] = useState(false);
-
-  // Fetch Episodes on Mount
-  useState(() => {
-    const fetchEpisodes = async () => {
-      const { data } = await supabase
-        .from("episodes")
-        .select("id, title")
-        .order("id", { ascending: false });
-      if (data) setEpisodes(data);
-    };
-    fetchEpisodes();
-  });
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,7 +40,6 @@ export default function Home() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           query,
-          filter_episode: selectedEpisode ? parseInt(selectedEpisode) : null,
         }),
         cache: "no-store",
       });
@@ -72,9 +53,13 @@ export default function Home() {
       if (data.results) {
         setResults(data.results);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Search failed", error);
-      setError(error.message || "فشل البحث، يرجى المحاولة مرة أخرى");
+      const message =
+        error instanceof Error
+          ? error.message
+          : "فشل البحث، يرجى المحاولة مرة أخرى";
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -132,20 +117,6 @@ export default function Home() {
         </div>
 
         {/* Filter Dropdown */}
-        {/* <div className="w-full max-w-3xl mx-auto mb-4 flex justify-end">
-          <select
-            value={selectedEpisode}
-            onChange={e => setSelectedEpisode(e.target.value)}
-            className="bg-transparent text-sm text-[#777] border-0 outline-none cursor-pointer hover:text-[#DB3C1D] transition-colors dir-rtl text-right appearance-none"
-            dir="rtl">
-            <option value="">كل الحلقات ({episodes.length})</option>
-            {episodes.map(ep => (
-              <option key={ep.id} value={ep.id}>
-                {ep.title}
-              </option>
-            ))}
-          </select>
-        </div> */}
 
         <form
           onSubmit={handleSearch}
@@ -413,7 +384,7 @@ export default function Home() {
                 className="space-y-6 text-lg leading-relaxed text-[#555] font-light"
                 dir="rtl">
                 <p>
-                  "أنا{" "}
+                  &quot;أنا{" "}
                   <span className="font-bold text-[#DB3C1D]">محمد الفهيدي</span>
                   ، مهندس برمجيات من اليمن.
                 </p>
@@ -428,7 +399,7 @@ export default function Home() {
                   <span className="bg-[#DB3C1D]/10 text-[#DB3C1D] px-2 py-0.5 rounded-md text-base">
                     جدران الحماية
                   </span>
-                  ، وقيود الميزانية، ومحدودية العتاد."
+                  ، وقيود الميزانية، ومحدودية العتاد.&quot;
                 </p>
               </div>
 

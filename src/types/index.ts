@@ -4,7 +4,7 @@ export interface Episode {
   url: string; // YouTube URL
   thumbnail_url?: string; // YouTube Thumbnail
   published_at: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface Chunk {

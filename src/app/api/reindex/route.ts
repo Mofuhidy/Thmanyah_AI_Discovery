@@ -82,8 +82,9 @@ export async function GET(req: Request) {
       } else {
         results.push({ id: chunk.id, status: "success" });
       }
-    } catch (err: any) {
-      results.push({ id: chunk.id, status: "error", error: err.message });
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Unknown error";
+      results.push({ id: chunk.id, status: "error", error: message });
     }
   }
 
