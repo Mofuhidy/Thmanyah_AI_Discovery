@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Sans_Arabic } from "next/font/google"; // Updated Font
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
 const ibmPlexSansArabic = IBM_Plex_Sans_Arabic({
@@ -59,6 +60,7 @@ export default function RootLayout({
     <html lang="ar" dir="rtl">
       <body className={`${ibmPlexSansArabic.variable} antialiased font-sans`}>
         {children}
+        <Analytics />
       </body>
     </html>
   );
